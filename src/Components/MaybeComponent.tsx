@@ -2,6 +2,7 @@ import React from 'react'
 
 type MaybeComponentProps = {
   readonly shouldShow: any,
+  readonly children: JSX.Element,
 }
 
 const MaybeComponent : React.FunctionComponent<MaybeComponentProps> = ({ shouldShow, children}) => {

@@ -5,6 +5,7 @@ import {
   FunctionalModel,
   ModelErrors,
   PropertyInstance,
+  MaybePromise,
 } from 'functional-models/interfaces'
 import { OrmModel, OrmModelInstance } from 'functional-models-orm/interfaces'
 
@@ -37,7 +38,6 @@ type FieldInputProps = {
 type FieldProps = {
   readonly property: PropertyInstance<any>
   readonly disabled: boolean
-  readonly key: string
   readonly propertyKey: string
   readonly errors: readonly string[]
   readonly value: any
@@ -71,8 +71,8 @@ type ReactFormType<T extends FunctionalModel> = {
 }
 
 type ReadWriteReactFormType<T extends FunctionalModel> = ReactFormType<T> & {
-  readonly onSubmit: (instance: OrmModelInstance<T>) => void
-  readonly onDelete: (instance: OrmModelInstance<T>) => void
+  readonly onSubmit: (instance: OrmModelInstance<T>) => MaybePromise<void>,
+  readonly onDelete: (instance: OrmModelInstance<T>) => MaybePromise<void>,
   readonly onCancel: () => void
 }
 

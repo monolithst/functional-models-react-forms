@@ -18,6 +18,17 @@ import { DEFAULT_MAX_ASYNC_CALLS } from '../constants'
 import MaybeComponent from './MaybeComponent'
 import { isOk } from '../utils'
 
+
+const OverallErrorList = ({ overallErrors }: { overallErrors: readonly string[] }) => {
+  return (
+    <ul className={"overall-error-list"} color={'danger'}>
+      {overallErrors.map((e: any) => (
+        <li key={`overall-${e}`}>{e}</li>
+      ))}
+    </ul>
+  )
+}
+
 const ReactForm = <T extends FunctionalModel>({
   model,
   canEdit = true,
@@ -66,6 +77,43 @@ const ReactForm = <T extends FunctionalModel>({
       })
     }
 
+  const LoadedField = ({
+    propertyKey,
+    property,
+  }: { propertyKey: string, property: any}) => {
+    const [value, setValue] = useState(undefined)
+    useEffect(() => {
+      if (value === undefined) {
+        return
+      }
+      (async () => {
+        // @ts-ignore
+        setValue(await modelInstance.get[propertyKey]())
+      })()
+
+    }, [value])
+    const field =
+      propertyKey in fieldOverrides
+      ? fieldOverrides[propertyKey]
+      : fieldGetter(property as PropertyInstance<any>)
+
+    const errorsToUse = merge({}, formErrors, errors) as {
+      readonly [s: string]: readonly string[] | undefined
+    }
+    const fieldErrors = errorsToUse[propertyKey] || []
+    const fieldValid = fieldErrors.length < 1
+
+    return field.create({
+      propertyKey,
+      disabled: !canEdit,
+      value,
+      errors: isFirst ? [] : fieldErrors,
+      valid: isFirst ? true : fieldValid,
+      property: property as PropertyInstance<any>,
+      onValueChanged: onValueChanged({ key: propertyKey }),
+    })
+  }
+
   useEffect(() => {
     (async () => {
       if (modelInstance && modelInstance.getModel().getName() !== model.getName() ) {
@@ -74,30 +122,11 @@ const ReactForm = <T extends FunctionalModel>({
       }
       const fields = await mapLimit(
         Object.entries(model.getModelDefinition().properties),
-        async ([key, property], i) => {
-          const field =
-            key in fieldOverrides
-              ? fieldOverrides[key]
-              : fieldGetter(property as PropertyInstance<any>)
-
-          // @ts-ignore
-          const value = await modelInstance.get[key]()
-          const errorsToUse = merge({}, formErrors, errors) as {
-            readonly [s: string]: readonly string[] | undefined
-          }
-          const fieldErrors = errorsToUse[key] || []
-          const fieldValid = fieldErrors.length < 1
-
-          return field.create({
-            key: `model-field-${key}-${i}`,
-            propertyKey: key,
-            disabled: !canEdit,
-            value,
-            errors: isFirst ? [] : fieldErrors,
-            valid: isFirst ? true : fieldValid,
-            property: property as PropertyInstance<any>,
-            onValueChanged: onValueChanged({ key }),
-          })
+        async ([propertyKey, property], i) => {
+          const key = `model-field-${propertyKey}-${i}`
+          return (
+            <LoadedField key={key } propertyKey={propertyKey} property={property} />
+          )
         },
         maxAsyncCalls
       )
@@ -111,11 +140,7 @@ const ReactForm = <T extends FunctionalModel>({
   return (
     <Form>
       <React.Fragment>
-        <ul color={'danger'}>
-          {overallErrors.map((e: any) => (
-            <li key={`overall-${e}`}>{e}</li>
-          ))}
-        </ul>
+        <OverallErrorList overallErrors={overallErrors} />
         {fields}
         <MaybeComponent shouldShow={onCancel}>
           <Button size={'lg'} color={'warning'} onClick={() => isOk(onCancel) ? onCancel() : {}}>

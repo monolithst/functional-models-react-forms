@@ -20,7 +20,6 @@ const Fields = ({
 }: FieldFactoryProps): Field => {
   const create: React.FunctionComponent<FieldProps> = ({
     disabled = false,
-    key,
     propertyKey,
     property,
     value,
@@ -37,16 +36,18 @@ const Fields = ({
       props,
     })
     return (
-      <FormGroup key={key} hidden={hidden} checked={isCheckbox}>
-        <React.Fragment>
-          <Label check={isCheckbox}>
-            {!isCheckbox ? titleCase(propertyKey) : ' '}
-          </Label>
-          {inputInstance}
-          {isCheckbox ? ` ${titleCase(propertyKey)}` : <React.Fragment />}
-          <FormFeedback>{errors.join('; ')}</FormFeedback>
-        </React.Fragment>
-      </FormGroup>
+      <React.Fragment>
+        <FormGroup hidden={hidden} checked={isCheckbox}>
+          <React.Fragment>
+            <Label check={isCheckbox}>
+              {!isCheckbox ? titleCase(propertyKey) : ' '}
+            </Label>
+            {inputInstance}
+            {isCheckbox ? ` ${titleCase(propertyKey)}` : <React.Fragment />}
+            <FormFeedback>{errors.join('; ')}</FormFeedback>
+          </React.Fragment>
+        </FormGroup>
+      </React.Fragment>
     )
   }
 
