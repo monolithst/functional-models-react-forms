@@ -4,23 +4,24 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ../../node_modules/react-scripts/bin/react-scripts.js start",
-    "build": "node ../../node_modules/react-scripts/bin/react-scripts.js build",
-    "test": "node ../../node_modules/react-scripts/bin/react-scripts.js test",
-    "eject": "node ../../node_modules/react-scripts/bin/react-scripts.js eject"
+    "start": "node ./node_modules/react-scripts/bin/react-scripts.js start",
+    "build": "node ./node_modules/react-scripts/bin/react-scripts.js build",
+    "test": "node ./node_modules/react-scripts/bin/react-scripts.js test",
+    "eject": "node ./node_modules/react-scripts/bin/react-scripts.js eject"
   },
   "dependencies": {
     "@types/node": "file:../../node_modules/@types/node",
     "@types/react": "file:../../node_modules/@types/react",
     "@types/react-dom": "file:../../node_modules/@types/react-dom",
+    "functional-models-react-forms": "file:../../",
+    "lodash": "^4.17.21",
     "react": "file:../../node_modules/react",
     "react-dom": "file:../../node_modules/react-dom",
-    "react-scripts": "file:../../node_modules/react-scripts",
-    "typescript": "file:../../node_modules/typescript",
-    "functional-models-react-forms": "file:../../"
+    "react-scripts": "file:../../node_modules/react-scripts"
   },
   "devDependencies": {
-    "@babel/plugin-syntax-object-rest-spread": "^7.8.3"
+    "@babel/plugin-syntax-object-rest-spread": "^7.8.3",
+    "typescript": "^4.8.4"
   },
   "eslintConfig": {
     "extends": "react-app"

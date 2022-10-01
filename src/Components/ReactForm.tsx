@@ -40,6 +40,7 @@ const ReactForm = <T extends FunctionalModel>({
   formErrors = undefined,
   fieldGetter = getFieldForProperty(),
   maxAsyncCalls = DEFAULT_MAX_ASYNC_CALLS,
+  clearForm = false,
 }: ReactFormType<T>) => {
   const [isFirst, setIsFirst] = useState<boolean>(true)
   const [modelInstance, setModelInstance] = useState<
@@ -68,7 +69,7 @@ const ReactForm = <T extends FunctionalModel>({
   const onValueChanged =
     ({ key }: { readonly key: string }): ValueChangedEvent =>
     value => {
-      modelInstance.toObj().then(x => {
+      modelInstance.toObj().then((x: any) => {
         const newData = merge(omit(x, [key]), { [key]: value })
         // @ts-ignore
         const newModel = model.create(newData)
@@ -77,55 +78,48 @@ const ReactForm = <T extends FunctionalModel>({
       })
     }
 
-  const LoadedField = ({
-    propertyKey,
-    property,
-  }: { propertyKey: string, property: any}) => {
-    const [value, setValue] = useState(undefined)
-    useEffect(() => {
-      if (value === undefined) {
-        return
-      }
-      (async () => {
-        // @ts-ignore
-        setValue(await modelInstance.get[propertyKey]())
-      })()
-
-    }, [value])
-    const field =
-      propertyKey in fieldOverrides
-      ? fieldOverrides[propertyKey]
-      : fieldGetter(property as PropertyInstance<any>)
-
-    const errorsToUse = merge({}, formErrors, errors) as {
-      readonly [s: string]: readonly string[] | undefined
-    }
-    const fieldErrors = errorsToUse[propertyKey] || []
-    const fieldValid = fieldErrors.length < 1
-
-    return field.create({
-      propertyKey,
-      disabled: !canEdit,
-      value,
-      errors: isFirst ? [] : fieldErrors,
-      valid: isFirst ? true : fieldValid,
-      property: property as PropertyInstance<any>,
-      onValueChanged: onValueChanged({ key: propertyKey }),
-    })
-  }
-
   useEffect(() => {
     (async () => {
       if (modelInstance && modelInstance.getModel().getName() !== model.getName() ) {
         setModelInstance(model.create({} as CreateParams<T>))
         return
       }
+      if(clearForm) {
+
+      }
+      console.log("redoing")
+
       const fields = await mapLimit(
         Object.entries(model.getModelDefinition().properties),
-        async ([propertyKey, property], i) => {
+        async ([propertyKey, property]: [string, any], i: number) => {
           const key = `model-field-${propertyKey}-${i}`
+          const field =
+            propertyKey in fieldOverrides
+              ? fieldOverrides[propertyKey]
+              : fieldGetter(property as PropertyInstance<any>)
+
+          const errorsToUse = merge({}, formErrors, errors) as {
+            readonly [s: string]: readonly string[] | undefined
+          }
+          const fieldErrors = errorsToUse[propertyKey] || []
+          const fieldValid = fieldErrors.length < 1
+          const value = await modelInstance.get[propertyKey]()
+          console.log(value)
+
           return (
-            <LoadedField key={key } propertyKey={propertyKey} property={property} />
+            <React.Fragment key={key}>
+              {
+                field.create({
+                  propertyKey,
+                  disabled: !canEdit,
+                  value,
+                  errors: isFirst ? [] : fieldErrors,
+                  valid: isFirst ? true : fieldValid,
+                  property: property as PropertyInstance<any>,
+                  onValueChanged: onValueChanged({ key: propertyKey }),
+                })
+              }
+            </React.Fragment>
           )
         },
         maxAsyncCalls
@@ -134,7 +128,7 @@ const ReactForm = <T extends FunctionalModel>({
       setIsFirst(false)
     })()
     return
-  }, [model, modelInstance, errors, formErrors])
+  }, [model, modelData, modelInstance, errors, formErrors])
 
   const overallErrors = errors.overall || []
   return (

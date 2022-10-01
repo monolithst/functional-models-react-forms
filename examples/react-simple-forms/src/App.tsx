@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react'
 import { TextProperty, ModelReferenceProperty, ArrayProperty } from 'functional-models'
 import { properties as ormProperties, orm } from 'functional-models-orm'
 import createDatastore from './localStorageDatastore'
-import { ReactForm } from 'functional-models-react-forms'
+import { SaveableForm } from 'functional-models-react-forms'
 import { List, ListGroupItem, Container, Dropdown, DropdownItem, DropdownToggle, DropdownMenu } from 'reactstrap'
 import {OrmModel, OrmModelInstance} from "functional-models-orm/interfaces"
 import {ormQueryBuilder} from "functional-models-orm/ormQuery"
@@ -127,6 +127,7 @@ const ModelList : React.FunctionComponent<ModelListProps> = ({ models, getText }
 function App() {
   const [model, setModel] = useState(null)
   const [modelInstances, setModelInstances] = useState<readonly OrmModelInstance<any>[]>([])
+  const [modelData, setModelData] = useState({})
   useEffect(() => {
     if (model) {
       (model as OrmModel<any>).search(ormQueryBuilder().compile()).then(result => {
@@ -156,14 +157,27 @@ function App() {
         {
           model
             ? (
-              <ReactForm
+              <SaveableForm
                 model={model}
                 canEdit={true}
+                modelData={modelData}
                 onSubmit={(x) => {
                   x.save().then(y=>{
                     setModelInstances([...modelInstances, x])
-                    y.toObj().then(console.log)
+                    y.toObj()
+                      .then(x => {
+                        console.log(x)
+                        return x
+                      })
+                      .then(() => {
+                        console.log("SETTING MODEL DATA")
+                        setModelData({})
+                      })
                   })
+                    .catch(e => {
+                      console.log(e)
+
+                    })
                 }
                 }
               />

@@ -61,8 +61,8 @@ type ReactFormType<T extends FunctionalModel> = {
   readonly model: OrmModel<T>
   readonly modelData?: CreateParams<T>
   readonly canEdit?: boolean
-  readonly onSubmit?: (instance: OrmModelInstance<T>) => void
-  readonly onDelete?: (instance: OrmModelInstance<T>) => void
+  readonly onSubmit?: (instance: OrmModelInstance<T>) => MaybePromise<void>
+  readonly onDelete?: (instance: OrmModelInstance<T>) => MaybePromise<void>
   readonly onCancel?: () => void
   readonly formErrors?: ModelErrors<T, OrmModel<T>>
   readonly fieldOverrides?: FieldOverrides
